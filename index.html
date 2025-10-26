@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waste Management Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f7;
+            color: #1d1d1f;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: #fff;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            text-align: center;
+            color: #1d1d1f;
+        }
+
+        .nav-container {
+            background: #fff;
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            padding: 12px 24px;
+            background: #f5f5f7;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            color: #1d1d1f;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: #e8e8ed;
+        }
+
+        .nav-btn.active {
+            background: #0071e3;
+            color: #fff;
+        }
+
+        .page {
+            display: none;
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .page-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #1d1d1f;
+        }
+
+        .dashboard-image {
+            width: 100%;
+            max-width: 600px;
+            height: 400px;
+            object-fit: cover;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin: 20px auto;
+            display: block;
+        }
+
+        .dashboard-image {
+            width: 100%;
+            max-width: 600px;
+            height: 400px;
+            object-fit: cover;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin: 20px auto;
+            display: block;
+        }
+
+        .dashboard-info {
+            background: #f5f5f7;
+            padding: 24px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .info-item {
+            margin-bottom: 15px;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            color: #6e6e73;
+        }
+
+        .note-box {
+            background: #e3f2fd;
+            border-left: 4px solid #0071e3;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .note-box strong {
+            color: #0071e3;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6e6e73;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f5f5f7;
+            border-top: 4px solid #0071e3;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th {
+            background: #f5f5f7;
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #1d1d1f;
+            border-bottom: 2px solid #e8e8ed;
+        }
+
+        td {
+            padding: 16px;
+            border-bottom: 1px solid #e8e8ed;
+            color: #6e6e73;
+        }
+
+        tr:hover {
+            background: #fafafa;
+        }
+
+        .pdf-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #0071e3;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .pdf-link:hover {
+            color: #0077ed;
+            text-decoration: underline;
+        }
+
+        .pdf-icon {
+            font-size: 18px;
+        }
+
+        .photo-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .photo-item {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .photo-item:hover {
+            transform: scale(1.05);
+        }
+
+        .photo-item img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .comparison-img {
+            width: 300px;
+            max-width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .before-img {
+            border: 3px solid #ff3b30;
+        }
+
+        .after-img {
+            border: 3px solid #34c759;
+        }
+
+        .img-badge {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .before-badge {
+            background: #ff3b30;
+        }
+
+        .after-badge {
+            background: #34c759;
+        }
+
+        .img-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6e6e73;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state-text {
+            font-size: 18px;
+        }
+
+        .error-message {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 16px;
+            border-radius: 8px;
+            margin: 20px 0;
+            color: #856404;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .page {
+                padding: 20px;
+            }
+
+            .page-title {
+                font-size: 1.5rem;
+            }
+
+            table {
+                font-size: 14px;
+            }
+
+            th,
+            td {
+                padding: 12px 8px;
+            }
+
+            .comparison-img {
+                width: 100%;
+                height: 180px;
+            }
+
+            .nav-btn {
+                padding: 10px 16px;
+                font-size: 14px;
+            }
+
+            .dashboard-image {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <h1>🌿 Waste Management Dashboard</h1>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="nav-container">
+            <div class="nav-buttons">
+                <button class="nav-btn active" onclick="showPage('dashboard')">Dashboard</button>
+                <button class="nav-btn" onclick="showPage('grievances')">Grievances</button>
+                <button class="nav-btn" onclick="showPage('photos')">Photos</button>
+                <button class="nav-btn" onclick="showPage('comparisons')">Comparisons</button>
+            </div>
+        </div>
+
+        <!-- Dashboard Page -->
+        <div id="dashboard" class="page active">
+            <h2 class="page-title">Dashboard Overview</h2>
+
+            <div class="dashboard-info">
+                <div class="info-item">
+                    <div class="info-label">Last Photo Date:</div>
+                    <div class="info-value" id="lastPhotoDate">Loading...</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Area Description:</div>
+                    <div class="info-value" id="areaDescription">Municipal waste collection zone covering residential
+                        sectors A-12 through A-18. This area includes approximately 2,500 households with daily waste
+                        generation averaging 4.2 tons. Collection points are strategically placed at 8 locations
+                        throughout the zone for optimal accessibility.</div>
+                </div>
+            </div>
+
+            <div id="dashboardPhotos" style="margin-top: 20px;"></div>
+
+            <div class="note-box">
+                <strong>📌 Note:</strong> Data is collected daily on-ground, but this dashboard is updated once a week
+                every Sunday to provide you with the latest comprehensive overview.
+            </div>
+        </div>
+
+        <!-- Grievances Page -->
+        <div id="grievances" class="page">
+            <h2 class="page-title">Grievances</h2>
+            <div id="grievancesTable">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <div>Loading grievances...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Photos Page -->
+        <div id="photos" class="page">
+            <h2 class="page-title">Photos</h2>
+            <div id="photosTable">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <div>Loading photos...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparisons Page -->
+        <div id="comparisons" class="page">
+            <h2 class="page-title">Before & After Comparisons</h2>
+            <div id="comparisonsTable">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <div>Loading comparisons...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let grievancesData = [];
+        let photosData = [];
+        let comparisonsData = [];
+
+        // Load data from JSON file
+        async function loadData() {
+            try {
+                const response = await fetch('/Users/arsheepsingh/Desktop/Garbage Website/data.json');
+                if (!response.ok) {
+                    throw new Error('Failed to load data');
+                }
+                const data = await response.json();
+
+                grievancesData = data.grievances || [];
+                photosData = data.photos || [];
+                comparisonsData = data.comparisons || [];
+
+                renderDashboard();
+                renderGrievances();
+                renderPhotos();
+                renderComparisons();
+            } catch (error) {
+                console.error('Error loading data:', error);
+                showError();
+            }
+        }
+
+        function showError() {
+            const errorHTML = `
+                <div class="error-message">
+                    <strong>⚠️ Error:</strong> Unable to load data. Please ensure data.json file exists in the same directory.
+                </div>
+            `;
+            document.getElementById('grievancesTable').innerHTML = errorHTML;
+            document.getElementById('photosTable').innerHTML = errorHTML;
+            document.getElementById('comparisonsTable').innerHTML = errorHTML;
+        }
+
+        function renderDashboard() {
+            // Get latest photo data from photos array
+            if (photosData.length > 0) {
+                const latestPhoto = photosData[0]; // Assumes first entry is the latest
+
+                // Update last photo date
+                document.getElementById('lastPhotoDate').textContent = latestPhoto.date || 'N/A';
+
+                // Display all photos from the latest date
+                const photosContainer = document.getElementById('dashboardPhotos');
+                if (latestPhoto.photos && latestPhoto.photos.length > 0) {
+                    const photosHtml = `
+                        <div class="photo-gallery">
+                            ${latestPhoto.photos.map(photo => `
+                                <div class="photo-item">
+                                    <img src="${photo}" alt="Photo from ${latestPhoto.date}" loading="lazy">
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                    photosContainer.innerHTML = photosHtml;
+                } else {
+                    photosContainer.innerHTML = '<p style="color: #6e6e73;">No photos available</p>';
+                }
+            } else {
+                document.getElementById('lastPhotoDate').textContent = 'No photos available';
+                document.getElementById('dashboardPhotos').innerHTML = '<p style="color: #6e6e73;">No photos available</p>';
+            }
+        }
+
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+
+            // Remove active class from all buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected page
+            document.getElementById(pageId).classList.add('active');
+
+            // Highlight active button
+            event.target.classList.add('active');
+        }
+
+        function renderGrievances() {
+            const container = document.getElementById('grievancesTable');
+
+            if (grievancesData.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📋</div>
+                        <div class="empty-state-text">No grievances recorded</div>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Grievance Document</th>
+                            <th>Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            grievancesData.forEach(item => {
+                html += `
+                    <tr>
+                        <td>${item.date}</td>
+                        <td>
+                            <a href="${item.document}" target="_blank" class="pdf-link">
+                                <span class="pdf-icon">📄</span>
+                                <span>${item.documentName || 'View Document'}</span>
+                            </a>
+                        </td>
+                        <td>${item.remarks}</td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                    </tbody>
+                </table>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        function renderPhotos() {
+            const container = document.getElementById('photosTable');
+
+            if (photosData.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📸</div>
+                        <div class="empty-state-text">No photos available</div>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Photos</th>
+                            <th>Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            photosData.forEach(item => {
+                const photosHtml = `
+                    <div class="photo-gallery">
+                        ${item.photos.map(photo => `
+                            <div class="photo-item">
+                                <img src="${photo}" alt="Photo from ${item.date}" loading="lazy">
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+
+                html += `
+                    <tr>
+                        <td>${item.date}</td>
+                        <td>${photosHtml}</td>
+                        <td>${item.remarks}</td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                    </tbody>
+                </table>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        function renderComparisons() {
+            const container = document.getElementById('comparisonsTable');
+
+            if (comparisonsData.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🔄</div>
+                        <div class="empty-state-text">No comparison data available</div>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Before</th>
+                            <th>After</th>
+                            <th>Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            comparisonsData.forEach(item => {
+                html += `
+                    <tr>
+                        <td>${item.date}</td>
+                        <td>
+                            <div class="img-container">
+                                <img src="${item.before}" alt="Before" class="comparison-img before-img" loading="lazy">
+                                <span class="img-badge before-badge">Before</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="img-container">
+                                <img src="${item.after}" alt="After" class="comparison-img after-img" loading="lazy">
+                                <span class="img-badge after-badge">After</span>
+                            </div>
+                        </td>
+                        <td>${item.remarks}</td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                    </tbody>
+                </table>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        // Load data when page loads
+        document.addEventListener('DOMContentLoaded', loadData);
+    </script>
+</body>
+
+</html>
