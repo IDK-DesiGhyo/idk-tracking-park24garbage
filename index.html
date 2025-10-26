@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -29,7 +28,7 @@
             background: #fff;
             padding: 20px 0;
             margin-bottom: 30px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
 
         h1 {
@@ -44,7 +43,7 @@
             padding: 15px;
             margin-bottom: 30px;
             border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
 
         .nav-buttons {
@@ -80,7 +79,7 @@
             background: #fff;
             padding: 30px;
             border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             animation: fadeIn 0.3s ease;
         }
 
@@ -89,15 +88,8 @@
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .page-title {
@@ -113,7 +105,7 @@
             height: 400px;
             object-fit: cover;
             border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             margin: 20px auto;
             display: block;
         }
@@ -124,7 +116,7 @@
             height: 400px;
             object-fit: cover;
             border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             margin: 20px auto;
             display: block;
         }
@@ -180,13 +172,8 @@
         }
 
         @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         table {
@@ -244,7 +231,7 @@
             position: relative;
             border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
             transition: transform 0.3s ease;
         }
 
@@ -346,8 +333,7 @@
                 font-size: 14px;
             }
 
-            th,
-            td {
+            th, td {
                 padding: 12px 8px;
             }
 
@@ -367,7 +353,6 @@
         }
     </style>
 </head>
-
 <body>
     <header>
         <div class="container">
@@ -388,7 +373,7 @@
         <!-- Dashboard Page -->
         <div id="dashboard" class="page active">
             <h2 class="page-title">Dashboard Overview</h2>
-
+            
             <div class="dashboard-info">
                 <div class="info-item">
                     <div class="info-label">Last Photo Date:</div>
@@ -396,18 +381,14 @@
                 </div>
                 <div class="info-item">
                     <div class="info-label">Area Description:</div>
-                    <div class="info-value" id="areaDescription">Municipal waste collection zone covering residential
-                        sectors A-12 through A-18. This area includes approximately 2,500 households with daily waste
-                        generation averaging 4.2 tons. Collection points are strategically placed at 8 locations
-                        throughout the zone for optimal accessibility.</div>
+                    <div class="info-value" id="areaDescription">Municipal waste collection zone covering residential sectors A-12 through A-18. This area includes approximately 2,500 households with daily waste generation averaging 4.2 tons. Collection points are strategically placed at 8 locations throughout the zone for optimal accessibility.</div>
                 </div>
             </div>
 
             <div id="dashboardPhotos" style="margin-top: 20px;"></div>
-
+            
             <div class="note-box">
-                <strong>📌 Note:</strong> Data is collected daily on-ground, but this dashboard is updated once a week
-                every Sunday to provide you with the latest comprehensive overview.
+                <strong>📌 Note:</strong> Data is collected daily on-ground, but this dashboard is updated once a week every Sunday to provide you with the latest comprehensive overview.
             </div>
         </div>
 
@@ -453,24 +434,70 @@
         // Load data from JSON file
         async function loadData() {
             try {
-                const response = await fetch('/Users/arsheepsingh/Desktop/Garbage Website/data.json');
+                // Try multiple paths for better compatibility
+                let response = await fetch('data.json');
+                
+                // If first attempt fails, try with ./ prefix
+                if (!response.ok) {
+                    response = await fetch('./data.json');
+                }
+                
                 if (!response.ok) {
                     throw new Error('Failed to load data');
                 }
                 const data = await response.json();
-
+                
                 grievancesData = data.grievances || [];
                 photosData = data.photos || [];
                 comparisonsData = data.comparisons || [];
-
+                
                 renderDashboard();
                 renderGrievances();
                 renderPhotos();
                 renderComparisons();
             } catch (error) {
                 console.error('Error loading data:', error);
-                showError();
+                // Load sample data for testing if JSON file not found
+                loadSampleData();
             }
+        }
+
+        // Sample data for testing (remove this function when deploying with real data.json)
+        function loadSampleData() {
+            grievancesData = [
+                {
+                    date: "2025-10-20",
+                    document: "https://onedrive.live.com/example1.pdf",
+                    documentName: "Grievance Report - Oct 20",
+                    remarks: "Overflow at Collection Point B"
+                }
+            ];
+
+            photosData = [
+                {
+                    date: "2025-10-20",
+                    photos: [
+                        "https://via.placeholder.com/400x300/4CAF50/ffffff?text=Collection+Point+A",
+                        "https://via.placeholder.com/400x300/2196F3/ffffff?text=Collection+Point+B",
+                        "https://via.placeholder.com/400x300/FF9800/ffffff?text=Collection+Point+C"
+                    ],
+                    remarks: "Regular collection day - all points serviced"
+                }
+            ];
+
+            comparisonsData = [
+                {
+                    date: "2025-10-20",
+                    before: "https://via.placeholder.com/400x300/FF5252/ffffff?text=Before+Cleanup",
+                    after: "https://via.placeholder.com/400x300/66BB6A/ffffff?text=After+Cleanup",
+                    remarks: "Collection Point B - Major improvement"
+                }
+            ];
+
+            renderDashboard();
+            renderGrievances();
+            renderPhotos();
+            renderComparisons();
         }
 
         function showError() {
@@ -488,10 +515,10 @@
             // Get latest photo data from photos array
             if (photosData.length > 0) {
                 const latestPhoto = photosData[0]; // Assumes first entry is the latest
-
+                
                 // Update last photo date
                 document.getElementById('lastPhotoDate').textContent = latestPhoto.date || 'N/A';
-
+                
                 // Display all photos from the latest date
                 const photosContainer = document.getElementById('dashboardPhotos');
                 if (latestPhoto.photos && latestPhoto.photos.length > 0) {
@@ -519,22 +546,22 @@
             document.querySelectorAll('.page').forEach(page => {
                 page.classList.remove('active');
             });
-
+            
             // Remove active class from all buttons
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
-
+            
             // Show selected page
             document.getElementById(pageId).classList.add('active');
-
+            
             // Highlight active button
             event.target.classList.add('active');
         }
 
         function renderGrievances() {
             const container = document.getElementById('grievancesTable');
-
+            
             if (grievancesData.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
@@ -582,7 +609,7 @@
 
         function renderPhotos() {
             const container = document.getElementById('photosTable');
-
+            
             if (photosData.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
@@ -635,7 +662,7 @@
 
         function renderComparisons() {
             const container = document.getElementById('comparisonsTable');
-
+            
             if (comparisonsData.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
@@ -692,5 +719,4 @@
         document.addEventListener('DOMContentLoaded', loadData);
     </script>
 </body>
-
 </html>
