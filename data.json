@@ -3,7 +3,7 @@
     {
       "date": "2025-10-24",
       "document": "https://bfuhs.ac.in/MBBS2025/6.%20revised%203rd%20round%20UG%20schedule%20for%20website%2024-10-25.pdf",
-      "documentName": "Schedule",
+      "documentName": "Schedule Document",
       "remarks": "Test grievance entry"
     }
   ],
@@ -11,18 +11,18 @@
     {
       "date": "2025-10-24",
       "photos": [
-        "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=800",
-        "https://images.unsplash.com/photo-1611284446314-60a58ac0deb9?w=800"
+        "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=800&h=600&fit=crop",
+        "https://images.unsplash.com/photo-1611284446314-60a58ac0deb9?w=800&h=600&fit=crop"
       ],
-      "remarks": "Test photos"
+      "remarks": "Sample waste collection photos"
     }
   ],
   "comparisons": [
     {
       "date": "2025-10-24",
-      "before": "https://images.unsplash.com/photo-1604187351574-c75ca79f5807?w=800",
-      "after": "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=800",
-      "remarks": "Before and after comparison"
+      "before": "https://images.unsplash.com/photo-1604187351574-c75ca79f5807?w=800&h=600&fit=crop",
+      "after": "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=800&h=600&fit=crop",
+      "remarks": "Before and after cleanup comparison"
     }
   ]
 }
