@@ -285,6 +285,23 @@
             background: #000;
         }
 
+        .comparison-img {
+            width: 300px;
+            max-width: 100%;
+            height: 200px;
+            object-fit: contain;
+            border-radius: 8px;
+            background: #000;
+        }
+
+        .comparison-video {
+            width: 300px;
+            max-width: 100%;
+            height: 200px;
+            border-radius: 8px;
+            background: #000;
+        }
+
         .img-container {
             position: relative;
             display: inline-block;
@@ -369,7 +386,6 @@
                 <button class="nav-btn active" onclick="showPage('dashboard')">Dashboard</button>
                 <button class="nav-btn" onclick="showPage('grievances')">Grievances</button>
                 <button class="nav-btn" onclick="showPage('photos')">Photos</button>
-                <button class="nav-btn" onclick="showPage('comparisons')">Comparisons</button>
             </div>
         </div>
 
@@ -416,35 +432,16 @@
                 </div>
             </div>
         </div>
-
-        <!-- Comparisons Page -->
-        <div id="comparisons" class="page">
-            <h2 class="page-title">Before & After Comparisons</h2>
-            <div id="comparisonsTable">
-                <div class="loading">
-                    <div class="loading-spinner"></div>
-                    <div>Loading comparisons...</div>
-                </div>
-            </div>
-        </div>
     </div>
 
     <script>
         let grievancesData = [];
         let photosData = [];
-        let comparisonsData = [];
 
         // Load data from JSON file
         async function loadData() {
             try {
-                // Try multiple paths for better compatibility
-                let response = await fetch('data.json');
-                
-                // If first attempt fails, try with ./ prefix
-                if (!response.ok) {
-                    response = await fetch('./data.json');
-                }
-                
+                const response = await fetch('data.json');
                 if (!response.ok) {
                     throw new Error('Failed to load data');
                 }
@@ -452,12 +449,10 @@
                 
                 grievancesData = data.grievances || [];
                 photosData = data.photos || [];
-                comparisonsData = data.comparisons || [];
                 
                 renderDashboard();
                 renderGrievances();
                 renderPhotos();
-                renderComparisons();
             } catch (error) {
                 console.error('Error loading data:', error);
                 // Load sample data for testing if JSON file not found
@@ -470,8 +465,12 @@
             grievancesData = [
                 {
                     date: "2025-10-20",
-                    document: "https://onedrive.live.com/example1.pdf",
-                    documentName: "Grievance Report - Oct 20",
+                    documents: [
+                        {
+                            url: "https://onedrive.live.com/example1.pdf",
+                            name: "Grievance Report - Oct 20"
+                        }
+                    ],
                     remarks: "Overflow at Collection Point B"
                 }
             ];
@@ -479,28 +478,23 @@
             photosData = [
                 {
                     date: "2025-10-20",
-                    photos: [
-                        "https://via.placeholder.com/400x300/4CAF50/ffffff?text=Collection+Point+A",
-                        "https://via.placeholder.com/400x300/2196F3/ffffff?text=Collection+Point+B",
-                        "https://via.placeholder.com/400x300/FF9800/ffffff?text=Collection+Point+C"
+                    media: [
+                        {
+                            url: "https://via.placeholder.com/400x300/4CAF50/ffffff?text=Collection+Point+A",
+                            type: "image"
+                        },
+                        {
+                            url: "https://via.placeholder.com/400x300/2196F3/ffffff?text=Collection+Point+B",
+                            type: "image"
+                        }
                     ],
                     remarks: "Regular collection day - all points serviced"
-                }
-            ];
-
-            comparisonsData = [
-                {
-                    date: "2025-10-20",
-                    before: "https://via.placeholder.com/400x300/FF5252/ffffff?text=Before+Cleanup",
-                    after: "https://via.placeholder.com/400x300/66BB6A/ffffff?text=After+Cleanup",
-                    remarks: "Collection Point B - Major improvement"
                 }
             ];
 
             renderDashboard();
             renderGrievances();
             renderPhotos();
-            renderComparisons();
         }
 
         function showError() {
@@ -511,7 +505,6 @@
             `;
             document.getElementById('grievancesTable').innerHTML = errorHTML;
             document.getElementById('photosTable').innerHTML = errorHTML;
-            document.getElementById('comparisonsTable').innerHTML = errorHTML;
         }
 
         function renderDashboard() {
@@ -732,66 +725,6 @@
                     <tr>
                         <td>${item.date || ''}</td>
                         <td>${mediaHtml || ''}</td>
-                        <td>${item.remarks || ''}</td>
-                    </tr>
-                `;
-            });
-
-            html += `
-                    </tbody>
-                </table>
-            `;
-
-            container.innerHTML = html;
-        }
-
-        function renderComparisons() {
-            const container = document.getElementById('comparisonsTable');
-            
-            if (comparisonsData.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">🔄</div>
-                        <div class="empty-state-text">No comparison data available</div>
-                    </div>
-                `;
-                return;
-            }
-
-            let html = `
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Before</th>
-                            <th>After</th>
-                            <th>Remarks</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-
-            comparisonsData.forEach(item => {
-                const beforeType = detectMediaType(item.before || '');
-                const afterType = detectMediaType(item.after || '');
-
-                const beforeHtml = item.before ? (
-                    beforeType === 'video' ? 
-                    `<video controls class="comparison-video"><source src="${item.before}" type="video/mp4"></video>` :
-                    `<img src="${item.before}" alt="Before" class="comparison-img" loading="lazy">`
-                ) : '';
-
-                const afterHtml = item.after ? (
-                    afterType === 'video' ?
-                    `<video controls class="comparison-video"><source src="${item.after}" type="video/mp4"></video>` :
-                    `<img src="${item.after}" alt="After" class="comparison-img" loading="lazy">`
-                ) : '';
-
-                html += `
-                    <tr>
-                        <td>${item.date || ''}</td>
-                        <td>${beforeHtml}</td>
-                        <td>${afterHtml}</td>
                         <td>${item.remarks || ''}</td>
                     </tr>
                 `;
