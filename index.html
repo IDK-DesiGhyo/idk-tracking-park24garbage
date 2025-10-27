@@ -209,6 +209,7 @@
             text-decoration: none;
             font-weight: 500;
             transition: color 0.3s ease;
+            margin-bottom: 8px;
         }
 
         .pdf-link:hover {
@@ -242,44 +243,46 @@
         .photo-item img {
             width: 100%;
             height: 200px;
-            object-fit: cover;
+            object-fit: contain;
             display: block;
+            background: #000;
+        }
+
+        .photo-item video {
+            width: 100%;
+            height: 200px;
+            object-fit: contain;
+            display: block;
+            background: #000;
+        }
+
+        .media-type-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
         }
 
         .comparison-img {
             width: 300px;
             max-width: 100%;
             height: 200px;
-            object-fit: cover;
+            object-fit: contain;
             border-radius: 8px;
-            position: relative;
+            background: #000;
         }
 
-        .before-img {
-            border: 3px solid #ff3b30;
-        }
-
-        .after-img {
-            border: 3px solid #34c759;
-        }
-
-        .img-badge {
-            position: absolute;
-            top: 8px;
-            left: 8px;
-            padding: 4px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            color: #fff;
-        }
-
-        .before-badge {
-            background: #ff3b30;
-        }
-
-        .after-badge {
-            background: #34c759;
+        .comparison-video {
+            width: 300px;
+            max-width: 100%;
+            height: 200px;
+            border-radius: 8px;
+            background: #000;
         }
 
         .img-container {
@@ -519,9 +522,38 @@
                 // Update last photo date
                 document.getElementById('lastPhotoDate').textContent = latestPhoto.date || 'N/A';
                 
-                // Display all photos from the latest date
+                // Display all photos/videos from the latest date
                 const photosContainer = document.getElementById('dashboardPhotos');
-                if (latestPhoto.photos && latestPhoto.photos.length > 0) {
+                if (latestPhoto.media && latestPhoto.media.length > 0) {
+                    const mediaHtml = `
+                        <div class="photo-gallery">
+                            ${latestPhoto.media.map(item => {
+                                const url = item.url || item;
+                                const type = item.type || detectMediaType(url);
+                                
+                                if (type === 'video') {
+                                    return `
+                                        <div class="photo-item">
+                                            <video controls>
+                                                <source src="${url}" type="video/mp4">
+                                                Your browser does not support video.
+                                            </video>
+                                            <span class="media-type-badge">VIDEO</span>
+                                        </div>
+                                    `;
+                                } else {
+                                    return `
+                                        <div class="photo-item">
+                                            <img src="${url}" alt="Media from ${latestPhoto.date}" loading="lazy">
+                                        </div>
+                                    `;
+                                }
+                            }).join('')}
+                        </div>
+                    `;
+                    photosContainer.innerHTML = mediaHtml;
+                } else if (latestPhoto.photos && latestPhoto.photos.length > 0) {
+                    // Backward compatibility with old format
                     const photosHtml = `
                         <div class="photo-gallery">
                             ${latestPhoto.photos.map(photo => `
@@ -533,12 +565,18 @@
                     `;
                     photosContainer.innerHTML = photosHtml;
                 } else {
-                    photosContainer.innerHTML = '<p style="color: #6e6e73;">No photos available</p>';
+                    photosContainer.innerHTML = '<p style="color: #6e6e73;">No media available</p>';
                 }
             } else {
                 document.getElementById('lastPhotoDate').textContent = 'No photos available';
-                document.getElementById('dashboardPhotos').innerHTML = '<p style="color: #6e6e73;">No photos available</p>';
+                document.getElementById('dashboardPhotos').innerHTML = '<p style="color: #6e6e73;">No media available</p>';
             }
+        }
+
+        function detectMediaType(url) {
+            const videoExtensions = ['.mp4', '.mov', '.avi', '.webm', '.mkv'];
+            const lowerUrl = url.toLowerCase();
+            return videoExtensions.some(ext => lowerUrl.includes(ext)) ? 'video' : 'image';
         }
 
         function showPage(pageId) {
@@ -577,7 +615,7 @@
                     <thead>
                         <tr>
                             <th>Date</th>
-                            <th>Grievance Document</th>
+                            <th>Grievance Documents</th>
                             <th>Remarks</th>
                         </tr>
                     </thead>
@@ -585,16 +623,30 @@
             `;
 
             grievancesData.forEach(item => {
+                // Handle multiple documents (array or single)
+                let documentsHtml = '';
+                if (Array.isArray(item.documents)) {
+                    documentsHtml = item.documents.map((doc, index) => `
+                        <a href="${doc.url || doc}" target="_blank" class="pdf-link">
+                            <span class="pdf-icon">📄</span>
+                            <span>${doc.name || `Document ${index + 1}`}</span>
+                        </a><br>
+                    `).join('');
+                } else if (item.document) {
+                    // Backward compatibility with single document
+                    documentsHtml = `
+                        <a href="${item.document}" target="_blank" class="pdf-link">
+                            <span class="pdf-icon">📄</span>
+                            <span>${item.documentName || 'View Document'}</span>
+                        </a>
+                    `;
+                }
+
                 html += `
                     <tr>
-                        <td>${item.date}</td>
-                        <td>
-                            <a href="${item.document}" target="_blank" class="pdf-link">
-                                <span class="pdf-icon">📄</span>
-                                <span>${item.documentName || 'View Document'}</span>
-                            </a>
-                        </td>
-                        <td>${item.remarks}</td>
+                        <td>${item.date || ''}</td>
+                        <td>${documentsHtml || ''}</td>
+                        <td>${item.remarks || ''}</td>
                     </tr>
                 `;
             });
@@ -625,7 +677,7 @@
                     <thead>
                         <tr>
                             <th>Date</th>
-                            <th>Photos</th>
+                            <th>Photos & Videos</th>
                             <th>Remarks</th>
                         </tr>
                     </thead>
@@ -633,21 +685,54 @@
             `;
 
             photosData.forEach(item => {
-                const photosHtml = `
-                    <div class="photo-gallery">
-                        ${item.photos.map(photo => `
-                            <div class="photo-item">
-                                <img src="${photo}" alt="Photo from ${item.date}" loading="lazy">
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
+                let mediaHtml = '';
+                
+                // New format with media array
+                if (item.media && item.media.length > 0) {
+                    mediaHtml = `
+                        <div class="photo-gallery">
+                            ${item.media.map(mediaItem => {
+                                const url = mediaItem.url || mediaItem;
+                                const type = mediaItem.type || detectMediaType(url);
+                                
+                                if (type === 'video') {
+                                    return `
+                                        <div class="photo-item">
+                                            <video controls>
+                                                <source src="${url}" type="video/mp4">
+                                                Your browser does not support video.
+                                            </video>
+                                            <span class="media-type-badge">VIDEO</span>
+                                        </div>
+                                    `;
+                                } else {
+                                    return `
+                                        <div class="photo-item">
+                                            <img src="${url}" alt="Media from ${item.date}" loading="lazy">
+                                        </div>
+                                    `;
+                                }
+                            }).join('')}
+                        </div>
+                    `;
+                } else if (item.photos && item.photos.length > 0) {
+                    // Backward compatibility with old format
+                    mediaHtml = `
+                        <div class="photo-gallery">
+                            ${item.photos.map(photo => `
+                                <div class="photo-item">
+                                    <img src="${photo}" alt="Photo from ${item.date}" loading="lazy">
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
 
                 html += `
                     <tr>
-                        <td>${item.date}</td>
-                        <td>${photosHtml}</td>
-                        <td>${item.remarks}</td>
+                        <td>${item.date || ''}</td>
+                        <td>${mediaHtml || ''}</td>
+                        <td>${item.remarks || ''}</td>
                     </tr>
                 `;
             });
@@ -687,22 +772,27 @@
             `;
 
             comparisonsData.forEach(item => {
+                const beforeType = detectMediaType(item.before || '');
+                const afterType = detectMediaType(item.after || '');
+
+                const beforeHtml = item.before ? (
+                    beforeType === 'video' ? 
+                    `<video controls class="comparison-video"><source src="${item.before}" type="video/mp4"></video>` :
+                    `<img src="${item.before}" alt="Before" class="comparison-img" loading="lazy">`
+                ) : '';
+
+                const afterHtml = item.after ? (
+                    afterType === 'video' ?
+                    `<video controls class="comparison-video"><source src="${item.after}" type="video/mp4"></video>` :
+                    `<img src="${item.after}" alt="After" class="comparison-img" loading="lazy">`
+                ) : '';
+
                 html += `
                     <tr>
-                        <td>${item.date}</td>
-                        <td>
-                            <div class="img-container">
-                                <img src="${item.before}" alt="Before" class="comparison-img before-img" loading="lazy">
-                                <span class="img-badge before-badge">Before</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="img-container">
-                                <img src="${item.after}" alt="After" class="comparison-img after-img" loading="lazy">
-                                <span class="img-badge after-badge">After</span>
-                            </div>
-                        </td>
-                        <td>${item.remarks}</td>
+                        <td>${item.date || ''}</td>
+                        <td>${beforeHtml}</td>
+                        <td>${afterHtml}</td>
+                        <td>${item.remarks || ''}</td>
                     </tr>
                 `;
             });
