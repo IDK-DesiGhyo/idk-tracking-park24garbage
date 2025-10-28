@@ -508,12 +508,18 @@
         }
 
         function renderDashboard() {
-            // Get latest photo data from photos array
+            // Get latest photo data from photos array (sorted by date, newest first)
             if (photosData.length > 0) {
-                const latestPhoto = photosData[0]; // Assumes first entry is the latest
+                // Sort by date descending
+                const sortedPhotos = [...photosData].sort((a, b) => {
+                    return new Date(b.date) - new Date(a.date);
+                });
                 
-                // Update last photo date
-                document.getElementById('lastPhotoDate').textContent = latestPhoto.date || 'N/A';
+                const latestPhoto = sortedPhotos[0];
+                
+                // Update last photo date (format as YYYY-MM-DD only, no time)
+                const dateOnly = latestPhoto.date.split(' ')[0];
+                document.getElementById('lastPhotoDate').textContent = dateOnly || 'N/A';
                 
                 // Display all photos/videos from the latest date
                 const photosContainer = document.getElementById('dashboardPhotos');
@@ -537,7 +543,7 @@
                                 } else {
                                     return `
                                         <div class="photo-item">
-                                            <img src="${url}" alt="Media from ${latestPhoto.date}" loading="lazy">
+                                            <img src="${url}" alt="Media from ${dateOnly}" loading="lazy" onerror="this.parentElement.innerHTML='<div style=padding:20px;text-align:center;color:#999>Image failed to load</div>'">
                                         </div>
                                     `;
                                 }
@@ -551,7 +557,7 @@
                         <div class="photo-gallery">
                             ${latestPhoto.photos.map(photo => `
                                 <div class="photo-item">
-                                    <img src="${photo}" alt="Photo from ${latestPhoto.date}" loading="lazy">
+                                    <img src="${photo}" alt="Photo from ${dateOnly}" loading="lazy" onerror="this.parentElement.innerHTML='<div style=padding:20px;text-align:center;color:#999>Image failed to load</div>'">
                                 </div>
                             `).join('')}
                         </div>
@@ -603,6 +609,11 @@
                 return;
             }
 
+            // Sort by date descending (newest first)
+            const sortedData = [...grievancesData].sort((a, b) => {
+                return new Date(b.date) - new Date(a.date);
+            });
+
             let html = `
                 <table>
                     <thead>
@@ -615,7 +626,10 @@
                     <tbody>
             `;
 
-            grievancesData.forEach(item => {
+            sortedData.forEach(item => {
+                // Format date (remove time if present)
+                const dateOnly = item.date ? item.date.split(' ')[0] : '';
+                
                 // Handle multiple documents (array or single)
                 let documentsHtml = '';
                 if (Array.isArray(item.documents)) {
@@ -637,7 +651,7 @@
 
                 html += `
                     <tr>
-                        <td>${item.date || ''}</td>
+                        <td>${dateOnly}</td>
                         <td>${documentsHtml || ''}</td>
                         <td>${item.remarks || ''}</td>
                     </tr>
@@ -665,6 +679,11 @@
                 return;
             }
 
+            // Sort by date descending (newest first)
+            const sortedData = [...photosData].sort((a, b) => {
+                return new Date(b.date) - new Date(a.date);
+            });
+
             let html = `
                 <table>
                     <thead>
@@ -677,7 +696,10 @@
                     <tbody>
             `;
 
-            photosData.forEach(item => {
+            sortedData.forEach(item => {
+                // Format date (remove time if present)
+                const dateOnly = item.date ? item.date.split(' ')[0] : '';
+                
                 let mediaHtml = '';
                 
                 // New format with media array
@@ -701,7 +723,7 @@
                                 } else {
                                     return `
                                         <div class="photo-item">
-                                            <img src="${url}" alt="Media from ${item.date}" loading="lazy">
+                                            <img src="${url}" alt="Media from ${dateOnly}" loading="lazy" onerror="this.parentElement.innerHTML='<div style=padding:20px;text-align:center;color:#999>Image failed to load</div>'">
                                         </div>
                                     `;
                                 }
@@ -714,7 +736,7 @@
                         <div class="photo-gallery">
                             ${item.photos.map(photo => `
                                 <div class="photo-item">
-                                    <img src="${photo}" alt="Photo from ${item.date}" loading="lazy">
+                                    <img src="${photo}" alt="Photo from ${dateOnly}" loading="lazy" onerror="this.parentElement.innerHTML='<div style=padding:20px;text-align:center;color:#999>Image failed to load</div>'">
                                 </div>
                             `).join('')}
                         </div>
@@ -723,7 +745,7 @@
 
                 html += `
                     <tr>
-                        <td>${item.date || ''}</td>
+                        <td>${dateOnly}</td>
                         <td>${mediaHtml || ''}</td>
                         <td>${item.remarks || ''}</td>
                     </tr>
