@@ -256,6 +256,14 @@
             background: #000;
         }
 
+        .photo-item iframe {
+            width: 100%;
+            height: 200px;
+            border: none;
+            display: block;
+            background: #000;
+        }
+
         .media-type-badge {
             position: absolute;
             top: 8px;
@@ -531,19 +539,18 @@
                                 const type = item.type || detectMediaType(url);
                                 
                                 if (type === 'video') {
+                                    const embedUrl = convertGDriveToEmbedLink(url);
                                     return `
                                         <div class="photo-item">
-                                            <video controls>
-                                                <source src="${url}" type="video/mp4">
-                                                Your browser does not support video.
-                                            </video>
+                                            <iframe src="${embedUrl}" allow="autoplay"></iframe>
                                             <span class="media-type-badge">VIDEO</span>
                                         </div>
                                     `;
                                 } else {
+                                    const embedUrl = convertGDriveToEmbedLink(url);
                                     return `
                                         <div class="photo-item">
-                                            <img src="${url}" alt="Media from ${dateOnly}" loading="lazy" onerror="this.parentElement.innerHTML='<div style=padding:20px;text-align:center;color:#999>Image failed to load</div>'">
+                                            <iframe src="${embedUrl}"></iframe>
                                         </div>
                                     `;
                                 }
@@ -555,11 +562,14 @@
                     // Backward compatibility with old format
                     const photosHtml = `
                         <div class="photo-gallery">
-                            ${latestPhoto.photos.map(photo => `
-                                <div class="photo-item">
-                                    <img src="${photo}" alt="Photo from ${dateOnly}" loading="lazy" onerror="this.parentElement.innerHTML='<div style=padding:20px;text-align:center;color:#999>Image failed to load</div>'">
-                                </div>
-                            `).join('')}
+                            ${latestPhoto.photos.map(photo => {
+                                const embedUrl = convertGDriveToEmbedLink(photo);
+                                return `
+                                    <div class="photo-item">
+                                        <iframe src="${embedUrl}"></iframe>
+                                    </div>
+                                `;
+                            }).join('')}
                         </div>
                     `;
                     photosContainer.innerHTML = photosHtml;
@@ -570,6 +580,42 @@
                 document.getElementById('lastPhotoDate').textContent = 'No photos available';
                 document.getElementById('dashboardPhotos').innerHTML = '<p style="color: #6e6e73;">No media available</p>';
             }
+        }
+
+        function convertGDriveToEmbedLink(url) {
+            /**
+             * Convert Google Drive links to iframe-embeddable format
+             * Handles both uc?export and file/d/ formats
+             */
+            if (!url) return url;
+            
+            // Extract file ID
+            let fileId = null;
+            
+            // Pattern 1: uc?export=view&id=FILE_ID
+            const ucMatch = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+            if (ucMatch) {
+                fileId = ucMatch[1];
+            }
+            
+            // Pattern 2: /file/d/FILE_ID/
+            const fileMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+            if (fileMatch) {
+                fileId = fileMatch[1];
+            }
+            
+            // Pattern 3: /d/FILE_ID/
+            const dMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+            if (dMatch) {
+                fileId = dMatch[1];
+            }
+            
+            if (fileId) {
+                // Use file/d/ID/preview format which works with iframe
+                return `https://drive.google.com/file/d/${fileId}/preview`;
+            }
+            
+            return url;
         }
 
         function detectMediaType(url) {
@@ -709,21 +755,19 @@
                             ${item.media.map(mediaItem => {
                                 const url = mediaItem.url || mediaItem;
                                 const type = mediaItem.type || detectMediaType(url);
+                                const embedUrl = convertGDriveToEmbedLink(url);
                                 
                                 if (type === 'video') {
                                     return `
                                         <div class="photo-item">
-                                            <video controls>
-                                                <source src="${url}" type="video/mp4">
-                                                Your browser does not support video.
-                                            </video>
+                                            <iframe src="${embedUrl}" allow="autoplay"></iframe>
                                             <span class="media-type-badge">VIDEO</span>
                                         </div>
                                     `;
                                 } else {
                                     return `
                                         <div class="photo-item">
-                                            <img src="${url}" alt="Media from ${dateOnly}" loading="lazy" onerror="this.parentElement.innerHTML='<div style=padding:20px;text-align:center;color:#999>Image failed to load</div>'">
+                                            <iframe src="${embedUrl}"></iframe>
                                         </div>
                                     `;
                                 }
@@ -734,11 +778,14 @@
                     // Backward compatibility with old format
                     mediaHtml = `
                         <div class="photo-gallery">
-                            ${item.photos.map(photo => `
-                                <div class="photo-item">
-                                    <img src="${photo}" alt="Photo from ${dateOnly}" loading="lazy" onerror="this.parentElement.innerHTML='<div style=padding:20px;text-align:center;color:#999>Image failed to load</div>'">
-                                </div>
-                            `).join('')}
+                            ${item.photos.map(photo => {
+                                const embedUrl = convertGDriveToEmbedLink(photo);
+                                return `
+                                    <div class="photo-item">
+                                        <iframe src="${embedUrl}"></iframe>
+                                    </div>
+                                `;
+                            }).join('')}
                         </div>
                     `;
                 }
