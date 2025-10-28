@@ -584,8 +584,8 @@
 
         function convertGDriveToEmbedLink(url) {
             /**
-             * Convert Google Drive links to iframe-embeddable format
-             * Handles both uc?export and file/d/ formats
+             * Convert Google Drive links to optimized image format
+             * Uses Google Drive's image serving endpoint
              */
             if (!url) return url;
             
@@ -611,8 +611,8 @@
             }
             
             if (fileId) {
-                // Use file/d/ID/preview format which works with iframe
-                return `https://drive.google.com/file/d/${fileId}/preview`;
+                // Use open?id= format which works well for images without iframe overhead
+                return `https://drive.google.com/uc?export=view&id=${fileId}`;
             }
             
             return url;
@@ -640,7 +640,50 @@
             
             // Highlight active button
             event.target.classList.add('active');
+            
+            // Update URL hash without scrolling
+            history.replaceState(null, null, `#${pageId}`);
         }
+
+        function loadPageFromHash() {
+            // Get hash from URL (remove # symbol)
+            const hash = window.location.hash.substring(1);
+            
+            // Valid page IDs
+            const validPages = ['dashboard', 'grievances', 'photos'];
+            
+            // If hash exists and is valid, show that page
+            if (hash && validPages.includes(hash)) {
+                // Hide all pages
+                document.querySelectorAll('.page').forEach(page => {
+                    page.classList.remove('active');
+                });
+                
+                // Remove active class from all buttons
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                
+                // Show the page from hash
+                document.getElementById(hash).classList.add('active');
+                
+                // Highlight the corresponding button
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    if (btn.textContent.toLowerCase() === hash) {
+                        btn.classList.add('active');
+                    }
+                });
+            }
+        }
+
+        // Load correct page on initial load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadPageFromHash();
+            loadData();
+        });
+
+        // Handle browser back/forward buttons
+        window.addEventListener('hashchange', loadPageFromHash);
 
         function renderGrievances() {
             const container = document.getElementById('grievancesTable');
@@ -807,8 +850,7 @@
             container.innerHTML = html;
         }
 
-        // Load data when page loads
-        document.addEventListener('DOMContentLoaded', loadData);
+        // Load data when page loads (removed DOMContentLoaded here since it's in showPage section now)
     </script>
 </body>
 </html>
